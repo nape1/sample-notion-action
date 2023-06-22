@@ -31,7 +31,7 @@ jobs:
         id: demo-1
         uses: peter-evans/create-pull-request@v3
         with:
-          token: ${{ secrets.AUTO_PR_TOKEN }}
+          token: ${{ secrets.GITHUB_TOKEN  }}
           branch: auto-pr-branch
           base: master
           commit-message: Add fetched metadata
