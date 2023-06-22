@@ -1,19 +1,46 @@
-name: Pull Request Action
+name: Fetch Metadata and Create PR
+
 on:
   push:
     branches:
-      - feature/*
+      - master
 
 jobs:
-  create-pull-request:
+  fetch-metadata:
     runs-on: ubuntu-latest
+
     steps:
-      - name: Check out repository code
+      - name: Checkout repository
         uses: actions/checkout@v2
-      - name: pull-request
-        uses: repo-sync/pull-request@v2
+
+      - name: Fetch metadata and create file
+        run: |
+          # Read the URLs from the file and fetch metadata for each URL
+          while IFS= read -r url; do
+            # Fetch page title for the URL
+            title=$(curl -s "$url" | grep -o '<title[^>]*>.*</title>' | sed -e 's/<[^>]*>//g' -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')
+            
+            # Append the fetched data to the array
+            fetched_data_array+=("{\"url\": \"$url\", \"title\": \"$title\"}")
+          done < urls.txt
+
+          # Create the output file with the fetched data
+          echo "[${fetched_data_array[@]}]" > fetched_data.json
+
+      - name: Create pull request
+        id: demo-1
+        uses: peter-evans/create-pull-request@v3
         with:
-          destination_branch: "develop"
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          pr_label: "feature, automated pr"
-          pr_title: "[Example] Simple demo"
+          token: ${{ secrets.GITHUB_TOKEN  }}
+          branch: auto-pr-branch
+          base: master
+          commit-message: Add fetched metadata
+          title: Add fetched metadata
+          committer: ${{env.GIT_COMMIT_AUTHOR_NAME}} <${{env.GIT_COMMIT_AUTHOR_EMAIL}}">
+          author: ${{env.GIT_COMMIT_AUTHOR_NAME}} <${{env.GIT_COMMIT_AUTHOR_EMAIL}}">
+          body: |
+            This PR adds a file with the fetched metadata from URLs.
+
+            Please review and merge it.
+
+          path: fetched_data.json
