@@ -1,54 +1,19 @@
-name: Fetch Metadata and Create PR
-permissions:
-  contents: write
-  pull-requests: write 
-  issues: read
-  packages: none
-
+name: Pull Request Action
 on:
   push:
     branches:
-      - master
+      - feature/*
 
 jobs:
-  fetch-metadata:
+  create-pull-request:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Harden Runner
-        uses: step-security/harden-runner@55d479fb1c5bcad5a4f9099a5d9f37c8857b2845 # v2.4.1
+      - name: Check out repository code
+        uses: actions/checkout@v2
+      - name: pull-request
+        uses: repo-sync/pull-request@v2
         with:
-          egress-policy: audit
-
-      - name: Checkout repository
-        uses: actions/checkout@ee0669bd1cc54295c223e0bb666b733df41de1c5 # v2.7.0
-
-      - name: Fetch metadata and create file
-        run: |
-          # Read the URLs from the file and fetch metadata for each URL
-          while IFS= read -r url; do
-            # Fetch page title for the URL
-            title=$(curl -s "$url" | grep -o '<title[^>]*>.*</title>' | sed -e 's/<[^>]*>//g' -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')
-            
-            # Append the fetched data to the array
-            fetched_data_array+=("{\"url\": \"$url\", \"title\": \"$title\"}")
-          done < urls.txt
-
-          # Create the output file with the fetched data
-          echo "[${fetched_data_array[@]}]" > fetched_data.json
-
-      - name: Create pull request
-        id: demo-1
-        uses: peter-evans/create-pull-request@18f7dc018cc2cd597073088f7c7591b9d1c02672 # v3.14.0
-        with:
-          token: ${{ secrets.GITHUB_TOKEN  }}
-          branch: auto-pr-branch
-          base: master
-          commit-message: Add fetched metadata
-          title: Add fetched metadata
-          body: |
-            This PR adds a file with the fetched metadata from URLs.
-
-            Please review and merge it.
-
-          path: fetched_data.json
+          destination_branch: "develop"
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          pr_label: "feature, automated pr"
+          pr_title: "[Example] Simple demo"
