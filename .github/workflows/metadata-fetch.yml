@@ -3,7 +3,7 @@ name: Fetch Metadata and Create PR
 on:
   push:
     branches:
-      - main
+      - master
 
 jobs:
   fetch-metadata:
@@ -41,4 +41,4 @@ jobs:
 
           path: fetched_data.json
           repository: ${{ github.repository }}
-          base: main
+          base: master
