@@ -1,5 +1,10 @@
 name: Fetch Metadata and Create PR
-
+permissions:
+  contents: write
+  pull-requests: write 
+  issues: read
+  packages: none
+  
 on:
   push:
     branches:
