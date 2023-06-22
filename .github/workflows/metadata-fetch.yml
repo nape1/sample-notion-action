@@ -31,9 +31,11 @@ jobs:
         uses: peter-evans/create-pull-request@v3
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          branch: add-metadata
+          branch: auto-metadata-branch
           commit-message: Add fetched metadata
           title: Add fetched metadata
+          committer: ${{env.GIT_COMMIT_AUTHOR_NAME}} <${{env.GIT_COMMIT_AUTHOR_EMAIL}}>
+          author: ${{env.GIT_COMMIT_AUTHOR_NAME}} <${{env.GIT_COMMIT_AUTHOR_EMAIL}}>
           body: |
             This PR adds a file with the fetched metadata from URLs.
 
